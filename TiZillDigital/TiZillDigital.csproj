@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <AssemblyName>TiZillDigital</AssemblyName>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <Company>TI ZILL DIGITAL</Company>
+    <Product>TI ZILL DIGITAL Suite</Product>
+    <Copyright>Copyright © 2025 TI ZILL DIGITAL</Copyright>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.*" />
+    <PackageReference Include="ESCPOS.Net" Version="3.*" />
+  </ItemGroup>
+</Project>
