@@ -5,6 +5,7 @@ public class CreditSale
     public string Id { get; set; } = string.Empty;
     public string Customer { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string Item { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal Paid { get; set; }

@@ -78,6 +78,19 @@ CREATE TABLE IF NOT EXISTS game_keys (
   FOREIGN KEY(game_id) REFERENCES games(id) ON DELETE CASCADE
 );";
 
+    public const string CreateCustomers = @"
+CREATE TABLE IF NOT EXISTS customers (
+  id TEXT PRIMARY KEY,
+  customer_code TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  phone TEXT,
+  email TEXT,
+  address TEXT,
+  notes TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);";
+
     public const string CreateSettings = @"
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,

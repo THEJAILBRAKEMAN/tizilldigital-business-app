@@ -22,12 +22,29 @@ public sealed class DatabaseManager : IDisposable
 
     private void RunMigrations()
     {
-        foreach (var sql in new[] { Schema.CreateCreditSales, Schema.CreatePayments, Schema.CreateExpenditure, Schema.CreateKeyOrders, Schema.CreateGames, Schema.CreateGameKeys, Schema.CreateSettings })
+        foreach (var sql in new[] { Schema.CreateCreditSales, Schema.CreatePayments, Schema.CreateExpenditure, Schema.CreateKeyOrders, Schema.CreateGames, Schema.CreateGameKeys, Schema.CreateCustomers, Schema.CreateSettings })
         {
             using var cmd = _connection.CreateCommand();
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
+
+        // Add customer_id columns to existing tables if they don't exist
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "ALTER TABLE credit_sales ADD COLUMN customer_id TEXT REFERENCES customers(id);";
+            cmd.ExecuteNonQuery();
+        }
+        catch { /* Column already exists */ }
+
+        try
+        {
+            using var cmd = _connection.CreateCommand();
+            cmd.CommandText = "ALTER TABLE key_orders ADD COLUMN customer_id TEXT REFERENCES customers(id);";
+            cmd.ExecuteNonQuery();
+        }
+        catch { /* Column already exists */ }
 
         var seeds = new Dictionary<string, string>
         {
@@ -195,6 +212,180 @@ VALUES(@id,@customer,@phone,@item,@amount,@paid,@sale_date,@notes,@created_at);"
     {
         using var cmd = _connection.CreateCommand(); cmd.CommandText = "INSERT INTO settings(key,value) VALUES(@k,@v) ON CONFLICT(key) DO UPDATE SET value=@v";
         cmd.Parameters.AddWithValue("@k", key); cmd.Parameters.AddWithValue("@v", value); cmd.ExecuteNonQuery();
+    }
+
+    public List<Customer> GetCustomers(string searchTerm = "")
+    {
+        var sql = "SELECT id, customer_code, name, phone, email, address, notes, created_at, updated_at FROM customers WHERE 1=1";
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            sql += @" AND (customer_code LIKE @search OR name LIKE @search OR phone LIKE @search OR email LIKE @search)";
+        }
+        sql += " ORDER BY created_at DESC";
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = sql;
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            cmd.Parameters.AddWithValue("@search", $"%{searchTerm}%");
+        }
+
+        using var r = cmd.ExecuteReader();
+        var list = new List<Customer>();
+        while (r.Read())
+        {
+            list.Add(new Customer
+            {
+                Id = r.GetString(0),
+                CustomerCode = r.GetString(1),
+                Name = r.GetString(2),
+                Phone = r.IsDBNull(3) ? null : r.GetString(3),
+                Email = r.IsDBNull(4) ? null : r.GetString(4),
+                Address = r.IsDBNull(5) ? null : r.GetString(5),
+                Notes = r.IsDBNull(6) ? null : r.GetString(6),
+                CreatedAt = r.IsDBNull(7) ? string.Empty : r.GetString(7),
+                UpdatedAt = r.IsDBNull(8) ? string.Empty : r.GetString(8)
+            });
+        }
+        return list;
+    }
+
+    public Customer? GetCustomerById(string id)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT id, customer_code, name, phone, email, address, notes, created_at, updated_at FROM customers WHERE id=@id";
+        cmd.Parameters.AddWithValue("@id", id);
+        using var r = cmd.ExecuteReader();
+        if (r.Read())
+        {
+            return new Customer
+            {
+                Id = r.GetString(0),
+                CustomerCode = r.GetString(1),
+                Name = r.GetString(2),
+                Phone = r.IsDBNull(3) ? null : r.GetString(3),
+                Email = r.IsDBNull(4) ? null : r.GetString(4),
+                Address = r.IsDBNull(5) ? null : r.GetString(5),
+                Notes = r.IsDBNull(6) ? null : r.GetString(6),
+                CreatedAt = r.IsDBNull(7) ? string.Empty : r.GetString(7),
+                UpdatedAt = r.IsDBNull(8) ? string.Empty : r.GetString(8)
+            };
+        }
+        return null;
+    }
+
+    public Customer? GetCustomerByCode(string code)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT id, customer_code, name, phone, email, address, notes, created_at, updated_at FROM customers WHERE customer_code=@code";
+        cmd.Parameters.AddWithValue("@code", code);
+        using var r = cmd.ExecuteReader();
+        if (r.Read())
+        {
+            return new Customer
+            {
+                Id = r.GetString(0),
+                CustomerCode = r.GetString(1),
+                Name = r.GetString(2),
+                Phone = r.IsDBNull(3) ? null : r.GetString(3),
+                Email = r.IsDBNull(4) ? null : r.GetString(4),
+                Address = r.IsDBNull(5) ? null : r.GetString(5),
+                Notes = r.IsDBNull(6) ? null : r.GetString(6),
+                CreatedAt = r.IsDBNull(7) ? string.Empty : r.GetString(7),
+                UpdatedAt = r.IsDBNull(8) ? string.Empty : r.GetString(8)
+            };
+        }
+        return null;
+    }
+
+    public string AddCustomer(Customer customer)
+    {
+        if (string.IsNullOrWhiteSpace(customer.Id))
+            customer.Id = IdHelper.NewId();
+
+        var customerCode = GenerateNextCustomerCode();
+        customer.CustomerCode = customerCode;
+        var now = DateTime.UtcNow.ToString("s");
+        customer.CreatedAt = now;
+        customer.UpdatedAt = now;
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+INSERT INTO customers(id, customer_code, name, phone, email, address, notes, created_at, updated_at)
+VALUES(@id, @code, @name, @phone, @email, @address, @notes, @created_at, @updated_at)";
+        cmd.Parameters.AddWithValue("@id", customer.Id);
+        cmd.Parameters.AddWithValue("@code", customer.CustomerCode);
+        cmd.Parameters.AddWithValue("@name", customer.Name);
+        cmd.Parameters.AddWithValue("@phone", customer.Phone ?? "");
+        cmd.Parameters.AddWithValue("@email", customer.Email ?? "");
+        cmd.Parameters.AddWithValue("@address", customer.Address ?? "");
+        cmd.Parameters.AddWithValue("@notes", customer.Notes ?? "");
+        cmd.Parameters.AddWithValue("@created_at", customer.CreatedAt);
+        cmd.Parameters.AddWithValue("@updated_at", customer.UpdatedAt);
+        cmd.ExecuteNonQuery();
+
+        return customer.CustomerCode;
+    }
+
+    public void UpdateCustomer(Customer customer)
+    {
+        customer.UpdatedAt = DateTime.UtcNow.ToString("s");
+
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = @"
+UPDATE customers 
+SET name=@name, phone=@phone, email=@email, address=@address, notes=@notes, updated_at=@updated_at 
+WHERE id=@id";
+        cmd.Parameters.AddWithValue("@id", customer.Id);
+        cmd.Parameters.AddWithValue("@name", customer.Name);
+        cmd.Parameters.AddWithValue("@phone", customer.Phone ?? "");
+        cmd.Parameters.AddWithValue("@email", customer.Email ?? "");
+        cmd.Parameters.AddWithValue("@address", customer.Address ?? "");
+        cmd.Parameters.AddWithValue("@notes", customer.Notes ?? "");
+        cmd.Parameters.AddWithValue("@updated_at", customer.UpdatedAt);
+        cmd.ExecuteNonQuery();
+    }
+
+    public void DeleteCustomer(string id)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM customers WHERE id=@id";
+        cmd.Parameters.AddWithValue("@id", id);
+        cmd.ExecuteNonQuery();
+    }
+
+    public string GenerateNextCustomerCode()
+    {
+        using var tx = _connection.BeginTransaction();
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT MAX(CAST(SUBSTR(customer_code, 4) AS INTEGER)) FROM customers";
+        var result = cmd.ExecuteScalar();
+        int nextNumber = 1;
+        if (result != null && result != DBNull.Value)
+        {
+            nextNumber = Convert.ToInt32(result) + 1;
+        }
+
+        string code = nextNumber > 999 ? $"CUS{nextNumber}" : $"CUS{nextNumber:000}";
+        tx.Commit();
+        return code;
+    }
+
+    public int CountOutstandingByCustomer(string customerId)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM credit_sales WHERE customer_id=@cid AND (amount - paid) > 0";
+        cmd.Parameters.AddWithValue("@cid", customerId);
+        return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+    }
+
+    public int CountOrdersByCustomer(string customerId)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM key_orders WHERE customer_id=@cid";
+        cmd.Parameters.AddWithValue("@cid", customerId);
+        return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
     }
 
     public void ExportToCsv(string tableName, string filePath)

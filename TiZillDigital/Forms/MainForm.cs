@@ -53,7 +53,7 @@ public class MainForm : Form
 
         var view = new ToolStripMenuItem("View");
         view.DropDownItems.Add("Refresh", null, (_, _) => ForwardShortcut(Keys.F5)).ShortcutKeys = Keys.F5;
-        foreach (var m in new[] { "Dashboard", "Credit Sales", "Expenditure", "Key Delivery", "Game Box Crawler" })
+        foreach (var m in new[] { "Dashboard", "Customers", "Credit Sales", "Expenditure", "Key Delivery", "Game Box Crawler" })
             view.DropDownItems.Add(m, null, (_, _) => ShowPanel(m));
 
         var tools = new ToolStripMenuItem("Tools");
@@ -73,6 +73,7 @@ public class MainForm : Form
         var sidebar = new Panel { Dock = DockStyle.Left, Width = 200, BackColor = Color.FromArgb(27, 26, 25), Padding = new Padding(8, 12, 8, 12) };
         var stack = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
         stack.Controls.Add(CreateNavButton("⊞  Dashboard", "Dashboard"));
+        stack.Controls.Add(CreateNavButton("👤 Customers", "Customers"));
         stack.Controls.Add(new Label { Text = "── BUSINESS ──", ForeColor = Color.Gainsboro, Width = 170 });
         stack.Controls.Add(CreateNavButton("💳 Credit Sales", "Credit Sales"));
         stack.Controls.Add(CreateNavButton("📊 Expenditure", "Expenditure"));
@@ -97,6 +98,7 @@ public class MainForm : Form
         UserControl panel = module switch
         {
             "Dashboard" => new DashboardPanel(_db, ShowPanel),
+            "Customers" => new CustomerPanel(_db),
             "Credit Sales" => new CreditSalesPanel(_db),
             "Expenditure" => new ExpenditurePanel(_db),
             "Key Delivery" => new KeyDeliveryPanel(_db),
