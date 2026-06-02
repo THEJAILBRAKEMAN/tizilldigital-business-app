@@ -1,0 +1,2 @@
+import {Dialog} from './Dialog';import {Button} from './Button';
+export function ConfirmDialog({open,title,message,onCancel,onConfirm}:{open:boolean;title:string;message:string;onCancel:()=>void;onConfirm:()=>void}){return <Dialog open={open} title={title} onClose={onCancel}><p className="mb-4 text-text-2">{message}</p><div className="flex justify-end gap-2"><Button variant="secondary" onClick={onCancel}>Cancel</Button><Button variant="danger" onClick={onConfirm}>Confirm</Button></div></Dialog>}

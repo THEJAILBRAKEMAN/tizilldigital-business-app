@@ -1,0 +1,1 @@
+import {formatMUR} from '../../utils/format';export function OutstandingDisplay({amount}:{amount:number}){return <div className={`border p-3 font-mono text-lg font-bold ${amount>0?'border-danger text-danger':'border-success text-success'}`}>Outstanding: {formatMUR(amount)}</div>}

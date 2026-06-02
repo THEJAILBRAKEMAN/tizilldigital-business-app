@@ -1,0 +1,1 @@
+import {useToast} from '../../store/useToast';import {Toast} from './Toast';export function ToastOverlay(){const toasts=useToast(s=>s.toasts);return <div className="fixed right-3 top-20 z-[60] flex w-80 max-w-[calc(100vw-1.5rem)] flex-col gap-2">{toasts.map(t=><Toast key={t.id} toast={t}/>)}</div>}

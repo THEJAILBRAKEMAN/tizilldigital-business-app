@@ -1,0 +1,1 @@
+import type {Toast as T} from '../../store/useToast';export function Toast({toast}:{toast:T}){const c={success:'border-success',error:'border-danger',warning:'border-warn',info:'border-accent'}[toast.type];return <div className={`border-l-4 ${c} border border-border bg-surface p-3 font-mono text-xs uppercase tracking-wide`}>{toast.message}</div>}

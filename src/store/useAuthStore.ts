@@ -1,0 +1,4 @@
+import {create} from 'zustand';import {dolibarrClient} from '../api/dolibarrClient';import {useSettingsStore} from './useSettingsStore';
+const KEY='tizill_dolibarr_token_session';
+type State={token:string;connection:'idle'|'testing'|'ok'|'failed';setToken:(token:string)=>void;clearToken:()=>void;testConnection:()=>Promise<boolean>};
+export const useAuthStore=create<State>((set,get)=>({token:sessionStorage.getItem(KEY)||'',connection:'idle',setToken:(token)=>{sessionStorage.setItem(KEY,token);set({token})},clearToken:()=>{sessionStorage.removeItem(KEY);set({token:''})},testConnection:async()=>{set({connection:'testing'});const {baseUrl}=useSettingsStore.getState().settings.dolibarr;dolibarrClient.setConfig(baseUrl,get().token);try{await dolibarrClient.listProducts();set({connection:'ok'});return true}catch{set({connection:'failed'});return false}}}));

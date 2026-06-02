@@ -1,0 +1,1 @@
+export function EmptyState({title,body}:{title:string;body?:string}){return <div className="border border-dashed border-border bg-surface-2 p-6 text-center"><div className="font-mono text-sm font-bold uppercase tracking-widest">{title}</div>{body&&<p className="mt-2 text-sm text-text-2">{body}</p>}</div>}

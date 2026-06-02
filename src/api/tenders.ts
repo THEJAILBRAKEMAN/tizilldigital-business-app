@@ -1,0 +1,5 @@
+import type {TenderMapping} from '../types';
+export const PAYMENT_METHODS=['Cash','Card','BLINK BY EMTEL','POP/MIPS','MCB JUICE QR','MCB JUICE','MY.T MONEY','MY.T MONEY BANK TRANSFER'];
+export const defaultTenderMappings:TenderMapping[]=[{label:'Cash',code:'LIQ',bankAccountId:14},{label:'Card',code:'CB',bankAccountId:16},{label:'BLINK BY EMTEL',code:'BLINK',bankAccountId:17},{label:'POP/MIPS',code:'MIPS',bankAccountId:18},{label:'MCB JUICE QR',code:'JM',bankAccountId:19},{label:'MCB JUICE',code:'JU',bankAccountId:20},{label:'MY.T MONEY',code:'MT',bankAccountId:21},{label:'MY.T MONEY BANK TRANSFER',code:'MTBT',bankAccountId:22}];
+export function normalizeTender(label:string){const l=label.trim();const map:Record<string,string>={'Juice':'MCB JUICE','Juice Online':'MCB JUICE QR','Juice POS':'MCB JUICE','Bank Transfer':'MY.T MONEY BANK TRANSFER','Cash':'Cash'};return map[l]||l}
+export function resolveTender(label:string,overrides:TenderMapping[]=[]){const normalized=normalizeTender(label);return [...overrides,...defaultTenderMappings].find(m=>m.label===normalized)||defaultTenderMappings[0]}

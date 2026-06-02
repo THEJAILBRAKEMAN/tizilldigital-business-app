@@ -1,0 +1,2 @@
+import {PAYMENT_METHODS} from '../../api/tenders';
+export function PaymentMethodPicker({value,onChange}:{value:string[];onChange:(v:string[])=>void}){return <div className="grid grid-cols-2 gap-1 md:grid-cols-4">{PAYMENT_METHODS.map(m=>{const on=value.includes(m);return <button key={m} type="button" onClick={()=>onChange(on?value.filter(x=>x!==m):[...value,m])} className={`border px-2 py-2 font-mono text-[10px] font-bold uppercase tracking-wider ${on?'border-accent bg-accent text-white':'border-border bg-surface text-text-2'}`}>{m}</button>})}</div>}
