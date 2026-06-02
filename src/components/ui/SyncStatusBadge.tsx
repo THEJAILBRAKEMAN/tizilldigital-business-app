@@ -1,0 +1,1 @@
+import type {SyncState} from '../../types';export function SyncStatusBadge({state}:{state:SyncState}){const c={PENDING:'bg-warn',SYNCING:'bg-accent',SYNCED:'bg-success',FAILED:'bg-danger'}[state];return <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase"><span className={`h-2 w-2 ${c}`}/>{state}</span>}

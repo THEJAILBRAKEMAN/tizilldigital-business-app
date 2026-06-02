@@ -1,0 +1,1 @@
+export function StatCard({label,value,meta}:{label:string;value:string;meta?:string}){return <div className="border border-border bg-surface p-3"><div className="font-mono text-[10px] font-bold uppercase tracking-widest text-text-2">{label}</div><div className="mt-2 font-mono text-xl font-bold">{value}</div>{meta&&<div className="mt-1 text-xs text-text-3">{meta}</div>}</div>}

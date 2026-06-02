@@ -1,0 +1,14 @@
+export type SyncState='PENDING'|'SYNCING'|'SYNCED'|'FAILED';
+export type Customer={id:string;customerCode:string;name:string;phone:string;email:string;address:string;notes:string;createdAt:string;dolibarrId?:number};
+export type LineItem={id:string;code:string;description:string;qty:number;unitPrice:number;dolibarrProductId?:number};
+export type Payment={id:string;amount:number;date:string;methods:string[];notes:string;recordedAt:string};
+export type CreditSale={id:string;invoiceNo:string;agreementNo:string;ticketNo:string;customerId:string;customerCode:string;customerName:string;customerPhone:string;stamp:string;date:string;status:'Active'|'Settled'|'Void';items:LineItem[];amountDeposited:number;payments:Payment[];paymentMethods:string[];paidDate:string;authSignature:string;authDate:string;notes:string;createdAt:string;updatedAt:string;dolibarrInvoiceId?:number;syncState:SyncState};
+export type KeyItem={id:string;productName:string;productCode:string;productKey:string};
+export type KeyDelivery={id:string;deliveryNo:string;customerId:string;customerCode:string;customerName:string;customerPhone:string;date:string;platform:string;region:string;deliveredBy:string;status:'Pending'|'Delivered'|'Failed';items:KeyItem[];notes:string;createdAt:string;updatedAt:string};
+export type ExpenseItem={id:string;category:string;description:string;amount:number};
+export type Expenditure={id:string;voucherNo:string;date:string;account:string;paidTo:string;items:ExpenseItem[];approvedBy:string;receivedBy:string;notes:string;createdAt:string;updatedAt:string};
+export type CatalogItem={id:string;code:string;description:string;price:number;category:string;notes:string;dolibarrProductId?:number};
+export type TenderMapping={label:string;code:string;bankAccountId:number};
+export type Settings={businessName:string;address:string;phone:string;email:string;receiptFooter:string;defaultPaymentMethods:string[];theme:'light'|'dark';layoutMode:'auto'|'mobile'|'desktop';dolibarr:{baseUrl:string};tenderMappings:TenderMapping[];printer:{deviceName?:string;width:58}};
+export type SyncQueueItem={id:string;recordType:'credit';recordId:string;state:SyncState;attempts:number;lastError?:string;nextRetryAt:number};
+export type SyncLog={id:string;timestamp:string;recordId:string;step:string;method:string;path:string;status?:number;body?:unknown;message:string};

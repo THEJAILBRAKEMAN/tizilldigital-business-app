@@ -1,0 +1,1 @@
+import {Input} from './Input';export function SearchBar({value,onChange,placeholder='Search'}:{value:string;onChange:(v:string)=>void;placeholder?:string}){return <Input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/>}
